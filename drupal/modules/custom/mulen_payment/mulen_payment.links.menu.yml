@@ -1,0 +1,7 @@
+
+mulen_payment.admin_settings:
+  title: 'Mulen Payment Settings'
+  description: 'Configure Mulen Payment integration.'
+  parent: system.admin_config_services
+  route_name: mulen_payment.settings
+  weight: 100

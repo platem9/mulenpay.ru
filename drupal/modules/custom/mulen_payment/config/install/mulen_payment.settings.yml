@@ -1,0 +1,4 @@
+
+mulen_payment.settings:
+  shop_id: ''
+  secret_key: ''

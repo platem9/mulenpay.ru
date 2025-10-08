@@ -1,0 +1,5 @@
+
+services:
+  mulen_payment.service:
+    class: Drupal\mulen_payment\MulenPaymentService
+    arguments: ['@config.factory', '@http_client']

@@ -1,0 +1,17 @@
+
+mulen_payment.callback:
+  path: '/payments/callback'
+  defaults:
+    _controller: '\Drupal\mulen_payment\Controller\MulenPaymentController::callback'
+    _title: 'Mulen Payment Callback'
+  methods: [POST]
+  requirements:
+    _access: 'TRUE'
+
+mulen_payment.settings:
+  path: '/admin/config/services/mulen_payment'
+  defaults:
+    _form: '\Drupal\mulen_payment\Form\MulenPaymentSettingsForm'
+    _title: 'Mulen Payment Settings'
+  requirements:
+    _permission: 'administer site configuration'

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="module" version="3.1" client="site" method="upgrade">
+    <name>Mulen Payment</name>
+    <author>Gemini</author>
+    <version>1.0.0</version>
+    <description>Mulen Payment module for Joomla</description>
+    <files>
+        <filename module="mod_payment">mod_payment.php</filename>
+        <filename>helper.php</filename>
+        <folder>tmpl</folder>
+        <folder>language</folder>
+    </files>
+    <config>
+        <fields name="params">
+            <fieldset name="basic">
+                <field name="shop_id" type="text" default="" label="Shop ID" description="Your Shop ID from Mulen Pay" />
+                <field name="secret_key" type="password" default="" label="Secret Key" description="Your Secret Key from Mulen Pay" />
+                <field name="api_key" type="password" default="" label="API Key" description="Your API Key from Mulen Pay" />
+            </fieldset>
+        </fields>
+    </config>
+</extension>

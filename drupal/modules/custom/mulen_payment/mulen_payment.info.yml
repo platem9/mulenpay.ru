@@ -1,0 +1,6 @@
+
+name: Mulen Payment
+type: module
+description: 'Integrates with Mulen Pay API for payments.'
+core_version_requirement: ^9 || ^10
+package: Custom

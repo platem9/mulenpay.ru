@@ -1,0 +1,850 @@
+openapi: 3.0.3
+info:
+  title: Mulen Pay API V1
+  version: 1.0.0
+  description: |-
+    Прием платежей и выплаты через Mulen Pay
+paths:
+  /v2/payments:
+    post:
+      summary: Создание платежа
+      tags:
+        - Платежи
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+      responses:
+        '201':
+          description: Платеж
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    description: Флаг успеха
+                    example: true
+                  paymentUrl:
+                    type: string
+                    description: URL для оплаты
+                    example: https://mulenpay.ru/
+                  id:
+                    type: integer
+                    description: ID платежа
+                    example: 1
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                error: unauthorized
+                status: 401
+        '422':
+          description: Ошибка валидации данных
+          content:
+            application/json:
+              example:
+                error: 'param is missing or the value is empty: article'
+                status: 422
+    get:
+      summary: Получение списка платежей
+      tags:
+        - Платежи
+      responses:
+        '200':
+          description: Список платежей
+          content:
+            application/json:
+              schema:
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Payment'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                error: unauthorized
+                status: 401
+        '422':
+          description: Ошибка валидации данных
+          content:
+            application/json:
+              example:
+                error: 'param is missing or the value is empty: article'
+                status: 422
+  /v2/payments/{id}:
+    get:
+      summary: Получение данных по платежу
+      tags:
+        - Платежи
+      responses:
+        '200':
+          description: Платеж
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    description: Флаг успеха
+                    example: true
+                  payment:
+                    $ref: '#/components/schemas/Payment'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                error: unauthorized
+                status: 401
+        '422':
+          description: Ошибка валидации данных
+          content:
+            application/json:
+              example:
+                error: 'param is missing or the value is empty: article'
+                status: 422
+  /v2/payments/{id}/hold:
+    put:
+      summary: Подтверждение списания средств
+      tags:
+        - Платежи
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              example:
+                success: true
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                error: unauthorized
+                status: 401
+        '422':
+          description: Ошибка валидации данных
+          content:
+            application/json:
+              example:
+                error: 'param is missing or the value is empty: article'
+                status: 422
+    delete:
+      summary: Отмена списания средств
+      tags:
+        - Платежи
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              example:
+                success: true
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                error: unauthorized
+                status: 401
+        '422':
+          description: Ошибка валидации данных
+          content:
+            application/json:
+              example:
+                error: 'param is missing or the value is empty: article'
+                status: 422
+  /v2/payments/{id}/refund:
+    put:
+      summary: Возврат платежа
+      tags:
+        - Платежи
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              example:
+                success: true
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                error: unauthorized
+                status: 401
+        '422':
+          description: Ошибка валидации данных
+          content:
+            application/json:
+              example:
+                error: 'param is missing or the value is empty: article'
+                status: 422
+  /v2/payments/{id}/receipt:
+    get:
+      summary: Получение данных о чеке
+      tags:
+        - Чеки
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID платежа, для которого нужно получить чек
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Успешное получение данных о чеке
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Receipt'
+        '404':
+          description: Чек не найден
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: Чек не найден
+        '401':
+          description: Неавторизованный доступ
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: error
+                  message:
+                    type: string
+                    example: Необходима авторизация
+#  /v2/payments/{id}/sbp:
+#    get:
+#      summary: Получение qr кода СБП
+#      tags:
+#        - Платежи
+#      parameters:
+#        - name: id
+#          in: path
+#          required: true
+#          description: ID платежа, для которого нужно получить чек
+#          schema:
+#            type: integer
+#      responses:
+#        '200':
+#          description: Успешное получение данных СБП
+#          content:
+#            application/json:
+#              schema:
+#                type: object
+#                properties:
+#                  status:
+#                    type: string
+#                    example: success
+#                  data:
+#                    type: object
+#                    properties:
+#                      qrpayload:
+#                        type: string
+#                        description: Строка от nspk
+#                        example: https://nspk.ru/qr132424234
+#                      qrlink:
+#                        type: string
+#                        description: Ссылка на готовый qr код, может быть пустым
+#                      externaltransaction:
+#                        type: string
+#                        description: Идентификатор транзакции
+  /v2/subscribes:
+    get:
+      summary: Получение списка подписок
+      tags:
+        - Подписки
+      responses:
+        '200':
+          description: Список подписок
+          content:
+            application/json:
+              schema:
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Subscribe'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                error: unauthorized
+                status: 401
+        '422':
+          description: Ошибка валидации данных
+          content:
+            application/json:
+              example:
+                error: 'param is missing or the value is empty: article'
+                status: 422
+  /v2/subscribes/{id}:
+    delete:
+      summary: Отмена подписки
+      tags:
+        - Подписки
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              example:
+                success: true
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                error: unauthorized
+                status: 401
+        '422':
+          description: Ошибка валидации данных
+          content:
+            application/json:
+              example:
+                error: 'param is missing or the value is empty: article'
+                status: 422
+
+  /payments/callback:
+    post:
+      summary: "Отправить запрос на callback для ресурса Payment"
+      description: >
+        Отправляет запрос на callback по настроенному URL продавца (магазина), если он задан.
+      tags:
+        - callbacks
+      operationId: "sendCallback"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  description: "ID платежа"
+                amount:
+                  type: number
+                  format: float
+                  description: "Сумма платежа"
+                currency:
+                  type: string
+                  description: "Валюта платежа (например, RUB)"
+                uuid:
+                  type: string
+                  description: "Внешний идентификатор платежа"
+                payment_status:
+                  type: string
+                  description: "Статус платежа для колбэка (например, 'success')"
+                  enum: ["success", "cancel"]
+              example:
+                id: 12345
+                amount: 100.50
+                currency: "RUB"
+                uuid: "external-uuid-123"
+                payment_status: "success"
+      responses:
+        '200':
+          description: "Запрос обратного вызова успешно отправлен"
+        '400':
+          description: "Некорректные данные о платеже или отсутствует URL для обратного вызова"
+        '404':
+          description: "Платеж не найден"
+  /v2/shops/{shopId}/balances:
+    get:
+      summary: Получение балансов магазина
+      tags:
+        - Балансы
+      parameters:
+        - name: shopId
+          in: path
+          required: true
+          description: ID магазина
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Список балансов магазина
+          content:
+            application/json:
+              schema:
+                properties:
+                  success:
+                    type: boolean
+                    description: Флаг успеха
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      balances:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Balance'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              example:
+                error: unauthorized
+                status: 401
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              example:
+                success: false
+                message: Магазин не найден или не принадлежит текущему пользователю
+        '422':
+          description: Ошибка валидации данных
+          content:
+            application/json:
+              example:
+                success: false
+                message: Ошибка валидации
+                errors:
+                  shop_id: [ "Поле shop_id должно быть целым числом." ]
+
+servers:
+  - url: https://mulenpay.ru/api
+    description: Production server
+security:
+  - api-key: []
+components:
+  securitySchemes:
+    api-key:
+      type: apiKey
+      name: Authorization
+      in: header
+      description: >-
+        API Key аутентификация.
+
+        Тип - Bearer
+
+        API ключ можно получить в личном кабинете в настройках магазина
+  parameters:
+    pageParam:
+      in: query
+      name: page
+      required: false
+      description: Pagination page
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        default: 1
+  schemas:
+    PaymentRequest:
+      description: Запрос платежа
+      required:
+        - currency
+        - amount
+        - shopId
+        - description
+        - sign
+        - uuid
+        - items
+      type: object
+      properties:
+        currency:
+          type: string
+          description: Валюта оплаты (rub)
+          example: rub
+          enum: ['rub']
+        amount:
+          type: number
+          description: Сумма оплаты с копейками строкой 100.50
+          example: "1000.50"
+        uuid:
+          type: string
+          description: Uuid заказа на строное магазина
+          example: invoice_123
+        shopId:
+          type: integer
+          description: ID магазина из ЛК
+          example: 5
+        description:
+          type: string
+          description: Описание платежа
+          example: Покупка булочек
+        website_url:
+          type: string
+          description: Ссылка на сайт магазина
+          example: https://example.com
+        subscribe:
+          type: string
+          description: Подписка, если не требуется то null, варианты данных - Day, Week, Month
+          example: null
+          enum: ['Day', 'Week', 'Month']
+        holdTime:
+          type: integer
+          description: Время в секундах, на которое происходит холд денег клиента. После гое истечения происходит отмена. Либо нужно подтвердить списание
+          example: null
+        language:
+          type: string
+          description: Язык формы оплаты
+          example: ru
+        items:
+          type: array
+          items:
+            type: object
+            required:
+              - description
+              - price
+              - quantity
+              - vat_code
+              - payment_subject
+              - payment_mode
+            properties:
+              description:
+                type: string
+                description: Описание товара
+              quantity:
+                type: number
+                description: Количество товара
+              price:
+                type: number
+                description: Цена товара
+              vat_code:
+                type: integer
+                description: |
+                  Код ставки НДС. Возможные значения:
+                  - 0: Без НДС
+                  - 1: НДС по ставке 0%
+                  - 2: НДС чека по ставке 10%
+                  - 3: НДС чека по ставке 18%
+                  - 4: НДС чека по расчетной ставке 10/110
+                  - 5: НДС чека по расчетной ставке 18/118
+                  - 6: НДС чека по ставке 20%
+                  - 7: НДС чека по расчетной ставке 20/120
+                enum: [0, 1, 2, 3, 4, 5, 6, 7]
+              payment_subject:
+                type: integer
+                description: |
+                  Код предмета платежа. Возможные значения:
+
+                  - 1: Товар
+                  - 2: Подакцизный товар
+                  - 3: Работа
+                  - 4: Услуга
+                  - 5: Ставка азартной игры
+                  - 6: Выигрыш азартной игры
+                  - 7: Лотерейный билет
+                  - 8: Выигрыш лотереи
+                  - 9: Предоставление РИД
+                  - 10: Платеж
+                  - 11: Агентское вознаграждение
+                  - 12: Выплата
+                  - 13: Иной предмет расчета
+                  - 14: Имущественное право
+                  - 15: Внереализационный доход
+                  - 16: Иные платежи и взносы
+                  - 17: Торговый сбор
+                  - 19: Залог
+                  - 20: Расход
+                  - 21: Взносы на обязательное пенсионное страхование ИП
+                  - 22: Взносы на обязательное пенсионное страхование
+                  - 23: Взносы на обязательное медицинское страхование ИП
+                  - 24: Взносы на обязательное медицинское страхование
+                  - 25: Взносы на обязательное социальное страхование
+                  - 26: Платеж казино
+                enum: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23, 24, 25, 26 ]
+              payment_mode:
+                type: integer
+                description: |
+                  Код метода платежа
+                   - 1: Полная предоплата
+                   - 2: Частичная предоплата
+                   - 3: Аванс
+                   - 4: Полный расчет
+                   - 5: Частичный расчет и кредит
+                   - 6: Кредит
+                   - 7: Выплата по кредиту
+                enum: [ 1, 2, 3, 4, 5, 6, 7 ]
+              product_code:
+                type: string
+                nullable: true
+              country_of_origin_code:
+                type: string
+                nullable: true
+              customs_declaration_number:
+                type: string
+                nullable: true
+              excise:
+                type: string
+                nullable: true
+              measurement_unit:
+                type: integer
+                nullable: true
+                example: 0
+                description: |
+                  Код единицы измерения. Возможные значения:
+                  - 0: Штука или единица (шт. или ед.)
+                  - 10: Грамм (г)
+                  - 11: Килограмм (кг)
+                  - 12: Тонна (т)
+                  - 20: Сантиметр (см)
+                  - 21: Дециметр (дм)
+                  - 22: Метр (м)
+                  - 30: Квадратный сантиметр (кв. см)
+                  - 31: Квадратный дециметр (кв. дм)
+                  - 32: Квадратный метр (кв. м)
+                  - 40: Миллилитр (мл)
+                  - 41: Литр (л)
+                  - 42: Кубический метр (куб. м)
+                  - 50: Киловатт час (кВт · ч)
+                  - 51: Гигакалория (Гкал)
+                  - 70: Сутки (сутки)
+                  - 71: Час (час)
+                  - 72: Минута (мин)
+                  - 73: Секунда (с)
+                  - 80: Килобайт (Кбайт)
+                  - 81: Мегабайт (Мбайт)
+                  - 82: Гигабайт (Гбайт)
+                  - 83: Терабайт (Тбайт)
+                  - 255: Применяется при использовании иных единиц измерения, не поименованных в п. п. 1 - 23
+                enum:
+                  - 0  # Штука или единица (шт. или ед.)
+                  - 10 # Грамм (г)
+                  - 11 # Килограмм (кг)
+                  - 12 # Тонна (т)
+                  - 20 # Сантиметр (см)
+                  - 21 # Дециметр (дм)
+                  - 22 # Метр (м)
+                  - 30 # Квадратный сантиметр (кв. см)
+                  - 31 # Квадратный дециметр (кв. дм)
+                  - 32 # Квадратный метр (кв. м)
+                  - 40 # Миллилитр (мл)
+                  - 41 # Литр (л)
+                  - 42 # Кубический метр (куб. м)
+                  - 50 # Киловатт час (кВт · ч)
+                  - 51 # Гигакалория (Гкал)
+                  - 70 # Сутки (сутки)
+                  - 71 # Час (час)
+                  - 72 # Минута (мин)
+                  - 73 # Секунда (с)
+                  - 80 # Килобайт (Кбайт)
+                  - 81 # Мегабайт (Мбайт)
+                  - 82 # Гигабайт (Гбайт)
+                  - 83 # Терабайт (Тбайт)
+                  - 255 # Применяется при использовании иных единиц измерения, не поименованных в п. п. 1 - 23
+        sign:
+          type: string
+          description: Подпись данных состоящая из конкатенации параметров currency, amount, shopId и секретного ключа из ЛК хешированная в sha1
+    Payment:
+      description: Платеж
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID платежа
+          example: 1
+        uuid:
+          type: string
+        amount:
+          type: string
+        currency:
+          type: string
+        description:
+          type: string
+        status:
+          type: integer
+          description: |
+            Статус платежа:
+            - 0: Создан
+            - 1: В обработке
+            - 2: Отменен
+            - 3: Обработан
+            - 4: Ошибка
+            - 5: Холд
+            - 6: Холд
+          enum: [ 0, 1, 2, 3, 4, 5, 6 ]
+          example: 3
+    Subscribe:
+      description: Подписка
+      type: object
+      properties:
+        id:
+          type: integer
+          description: ID подписки
+          example: 1
+        description:
+          type: string
+        status:
+          type: integer
+        currency:
+          type: string
+          description: Валюта оплаты (rub)
+          example: rub
+        amount:
+          type: string
+          description: Сумма оплаты с копейками строкой 100.50
+          example: "1000.50"
+        start_date:
+          type: string
+          description: Стартовая дата
+        next_pay_date:
+          type: string
+          description: Следующая дата оплаты
+        interval:
+          type: string
+          description: Интервал списания, варианты данных - Day, Week, Month
+          example: null
+    ArticleFlareTag:
+      description: Flare tag of the article
+      type: object
+      properties:
+        name:
+          type: string
+        bg_color_hex:
+          description: Background color (hexadecimal)
+          type: string
+          nullable: true
+        text_color_hex:
+          description: Text color (hexadecimal)
+          type: string
+          nullable: true
+    Receipt:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Уникальный идентификатор чека
+          example: 1
+        daemon_code:
+          type: string
+          description: Код демона, если применимо
+          example: "DAEMON123"
+        device_code:
+          type: string
+          description: Код устройства, если применимо
+          example: "DEVICE456"
+        warnings:
+          type: array
+          items:
+            type: string
+          description: Список предупреждений, связанных с чеком
+          example: [ "Warning 1", "Warning 2" ]
+        error:
+          type: array
+          items:
+            type: string
+          description: Список ошибок, связанных с чеком
+          example: [ "Error 1", "Error 2" ]
+        ecr_registration_number:
+          type: string
+          description: Регистрационный номер ККТ
+          example: "REG123456"
+        fiscal_document_attribute:
+          type: integer
+          description: Атрибут фискального документа
+          example: 1
+        fiscal_document_number:
+          type: integer
+          description: Номер фискального документа
+          example: 1001
+        fiscal_receipt_number:
+          type: integer
+          description: Номер фискального чека
+          example: 5001
+        fn_number:
+          type: string
+          description: Номер фискального накопителя
+          example: "FN123456"
+        fns_site:
+          type: string
+          description: Сайт ФНС
+          example: "https://fns.ru"
+        receipt_datetime:
+          type: string
+          format: date-time
+          description: Дата и время создания чека
+          example: "2023-10-01T12:00:00Z"
+        shift_number:
+          type: integer
+          description: Номер смены
+          example: 1
+        total:
+          type: number
+          format: float
+          description: Общая сумма чека
+          example: 1000.50
+        ofd_inn:
+          type: string
+          description: ИНН ОФД
+          example: "1234567890"
+        ofd_receipt_url:
+          type: string
+          description: URL для получения чека у ОФД
+          example: "https://ofd.example.com/receipt/1"
+        status:
+          type: string
+          description: Статус чека
+          example: "success"
+        uuid:
+          type: string
+          description: Уникальный идентификатор заказа
+          example: "invoice_123"
+        created_at:
+          type: string
+          format: date-time
+          description: Дата и время создания записи о чеке
+          example: "2023-10-01T12:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          description: Дата и время последнего обновления записи о чеке
+          example: "2023-10-01T12:00:00Z"
+    Balance:
+      description: Баланс магазина
+      type: object
+      properties:
+        shop_id:
+          type: integer
+          description: ID магазина
+          example: 5
+        currency:
+          type: string
+          description: Валюта баланса
+          example: rub
+        balance:
+          type: number
+          format: float
+          description: Общий баланс
+          example: 1000.50
+        hold:
+          type: number
+          format: float
+          description: Сумма на холде
+          example: 200.00
+        available:
+          type: number
+          format: float
+          description: Доступная сумма (balance - hold)
+          example: 800.50
