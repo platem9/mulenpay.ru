@@ -1,0 +1,28 @@
+{
+    "name": "mulen/mulen-pay-sdk",
+    "description": "PHP SDK for Mulen Pay API",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Cline",
+            "email": "cline@example.com"
+        }
+    ],
+    "require": {
+        "guzzlehttp/guzzle": "^7.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Mulen\\MulenPay\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Mulen\\MulenPay\\Tests\\": "tests/"
+        }
+    }
+}
