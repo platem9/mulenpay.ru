@@ -30,6 +30,7 @@ class WC_Gateway_Mulen_Pay extends WC_Payment_Gateway {
 		$this->description  = $this->get_option( 'description' );
 		$this->shop_id      = $this->get_option( 'shop_id' );
 		$this->secret_key   = $this->get_option( 'secret_key' );
+		$this->api_key      = $this->get_option( 'api_key' );
 
 		// Actions.
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
@@ -74,6 +75,13 @@ class WC_Gateway_Mulen_Pay extends WC_Payment_Gateway {
 				'default'     => '',
 				'desc_tip'    => true,
 			),
+			'api_key' => array(
+				'title'       => __( 'API Key', 'mulen-pay-gateway' ),
+				'type'        => 'password',
+				'description' => __( 'Enter your Mulen Pay API Key (used for Authorization header).', 'mulen-pay-gateway' ),
+				'default'     => '',
+				'desc_tip'    => true,
+			),
 		);
 	}
 
@@ -86,8 +94,9 @@ class WC_Gateway_Mulen_Pay extends WC_Payment_Gateway {
 	public function process_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
 
-		$currency = $order->get_currency();
+		$currency = strtolower( $order->get_currency() );
 		$amount = $order->get_total();
+		$amount_str = number_format( (float) $amount, 2, '.', '' );
 		$shopId = $this->shop_id;
 		$uuid = 'order_' . $order_id;
 		$description = 'Order ' . $order_id;
@@ -98,18 +107,18 @@ class WC_Gateway_Mulen_Pay extends WC_Payment_Gateway {
 			$items[] = array(
 				'description' => $item->get_name(),
 				'quantity' => $item->get_quantity(),
-				'price' => $product->get_price(),
+				'price' => (float) $product->get_price(),
 				'vat_code' => 0,
 				'payment_subject' => 1,
 				'payment_mode' => 4,
 			);
 		}
 
-		$sign = sha1( $currency . $amount . $shopId . $this->secret_key );
+		$sign = sha1( $currency . $amount_str . $shopId . $this->secret_key );
 
 		$body = array(
 			'currency' => $currency,
-			'amount' => $amount,
+			'amount' => $amount_str,
 			'shopId' => $shopId,
 			'uuid' => $uuid,
 			'description' => $description,
@@ -121,7 +130,7 @@ class WC_Gateway_Mulen_Pay extends WC_Payment_Gateway {
 			'method'    => 'POST',
 			'headers'   => array(
 				'Content-Type'  => 'application/json',
-				'Authorization' => 'Bearer ' . $this->secret_key,
+				'Authorization' => 'Bearer ' . $this->api_key,
 			),
 			'body'      => json_encode( $body ),
 			'timeout'   => 60,
